@@ -16,7 +16,7 @@ The API acts as the **producer layer** in the system.
 
 # 🧠 System Overview
 
-This project demonstrates how modern distributed job schedulers work internally (similar to systems used by companies like Uber, Airbnb, and Netflix).
+This project demonstrates how modern distributed job schedulers work internally.
 
 Architecture:
 
