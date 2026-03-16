@@ -57,61 +57,6 @@ This architecture ensures:
 
 ---
 
-# 📦 Database Schema
-
-Main tables used by this service:
-
-job_definitions
-job_instances
-job_executions
-
-### job_definitions
-
-Defines the template for a job.
-
-| Column          | Description            |
-| --------------- | ---------------------- |
-| id              | UUID                   |
-| name            | Job name               |
-| job_type        | Type of job            |
-| cron_expression | Optional cron schedule |
-| default_payload | Default payload        |
-| created_at      | Timestamp              |
-
----
-
-### job_instances
-
-Represents a scheduled execution.
-
-| Column          | Description                                     |
-| --------------- | ----------------------------------------------- |
-| id              | UUID                                            |
-| job_def_id      | Reference to definition                         |
-| idempotency_key | Prevent duplicate jobs                          |
-| status          | PENDING / PROCESSING / COMPLETED / RETRY / DEAD |
-| payload         | JSON payload                                    |
-| next_run_time   | When job should run                             |
-| retry_count     | Current retries                                 |
-| max_retries     | Retry limit                                     |
-
----
-
-### job_executions
-
-Tracks execution attempts.
-
-| Column          | Description                     |
-| --------------- | ------------------------------- |
-| id              | UUID                            |
-| job_instance_id | Parent job                      |
-| attempt_number  | Execution attempt               |
-| status          | PROCESSING / COMPLETED / FAILED |
-| worker_id       | Worker handling job             |
-| error_message   | Failure reason                  |
-
----
-
 # 🚀 API Endpoints
 
 ## Create Job Definition
@@ -147,7 +92,7 @@ Example request:
 
 ## Get Job Status
 
-GET /jobs/:id
+GET /job/:id
 
 Returns job state and retry information.
 
@@ -221,16 +166,6 @@ npm run dev
 Server runs on:
 
 http://localhost:8000
-
----
-
-# 🧪 Load Testing
-
-Run the load test script:
-
-node test-load.js
-
-This submits 100+ jobs to test the system.
 
 ---
 
