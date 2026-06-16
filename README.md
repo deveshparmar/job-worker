@@ -1,4 +1,4 @@
-# Distributed Job Scheduler — Job Worker
+# Distributed Job Scheduler Job Worker
 
 This service is the **execution layer** of the Distributed Job Scheduler system. It is responsible for:
 
@@ -186,9 +186,9 @@ stateDiagram-v2
 
 The worker coordinates three dispatch paths:
 
-1. **Kafka consumer (primary)** — each message triggers `processAvailableJobs()` to claim and run work.
-2. **Reconciliation poller (fallback)** — periodically polls the database for runnable jobs missed by Kafka (for example, outbox relay delay or broker hiccup).
-3. **Cron scheduler (leader-elected)** — one worker acquires a PostgreSQL advisory lock and enqueues due cron job instances plus outbox events.
+1. **Kafka consumer (primary)**  each message triggers `processAvailableJobs()` to claim and run work.
+2. **Reconciliation poller (fallback)**  periodically polls the database for runnable jobs missed by Kafka (for example, outbox relay delay or broker hiccup).
+3. **Cron scheduler (leader-elected)**  one worker acquires a PostgreSQL advisory lock and enqueues due cron job instances plus outbox events.
 
 Execution flow:
 
@@ -224,12 +224,12 @@ Per-job timeout comes from `job_definitions.timeout_seconds`, falling back to `D
 
 # Concurrency and Reliability
 
-* **Worker concurrency** — `WORKER_CONCURRENCY` caps how many jobs a single process runs at once (default 5).
-* **Heartbeats** — while a job runs, `last_heartbeat` is updated on a fixed interval so the sweeper can distinguish live work from crashed workers.
-* **Timeouts** — handlers are wrapped in `withTimeout()`; exceeded jobs fail and enter the retry/DLQ path.
-* **Stale recovery** — every 60 seconds, jobs in `PROCESSING` with an expired heartbeat/lock are moved to `RETRY` or `DEAD_LETTER`.
-* **Graceful shutdown** — on `SIGINT`/`SIGTERM`, the worker stops accepting new Kafka work and waits for in-flight jobs to finish.
-* **Dead letters** — terminal failures are written to `dead_letter_records` and published to the DLQ Kafka topic; a dedicated DLQ consumer persists inbound DLQ events as well.
+* **Worker concurrency**  `WORKER_CONCURRENCY` caps how many jobs a single process runs at once (default 5).
+* **Heartbeats**  while a job runs, `last_heartbeat` is updated on a fixed interval so the sweeper can distinguish live work from crashed workers.
+* **Timeouts**  handlers are wrapped in `withTimeout()`; exceeded jobs fail and enter the retry/DLQ path.
+* **Stale recovery**  every 60 seconds, jobs in `PROCESSING` with an expired heartbeat/lock are moved to `RETRY` or `DEAD_LETTER`.
+* **Graceful shutdown**  on `SIGINT`/`SIGTERM`, the worker stops accepting new Kafka work and waits for in-flight jobs to finish.
+* **Dead letters**  terminal failures are written to `dead_letter_records` and published to the DLQ Kafka topic; a dedicated DLQ consumer persists inbound DLQ events as well.
 
 ---
 
