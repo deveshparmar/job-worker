@@ -1,6 +1,7 @@
 import { config } from "../config/index.js";
 import { jobsReceived } from "../metrics/metrics.js";
-import { runWorkerCycleWithoutKafka } from "../worker/jobRunner.js";
+import { processAvailableJobs } from "../worker/jobRunner.js";
+import { isShuttingDown } from "../worker/shutdown.js";
 import { consumer } from "./client.js";
 
 export async function consume() {
@@ -15,6 +16,10 @@ export async function consume() {
     autoCommit: false,
 
     eachMessage: async ({ topic, partition, message }) => {
+      if (isShuttingDown()) {
+        return;
+      }
+
       jobsReceived.inc();
 
       console.log(
@@ -22,8 +27,7 @@ export async function consume() {
       );
 
       try {
-        // trigger worker cycle
-        await runWorkerCycleWithoutKafka();
+        await processAvailableJobs();
 
         await consumer.commitOffsets([
           {
@@ -32,7 +36,6 @@ export async function consume() {
             offset: (Number(message.offset) + 1).toString(),
           },
         ]);
-
       } catch (error) {
         console.error("Worker cycle failed:", error);
       }

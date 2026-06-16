@@ -4,7 +4,7 @@ import { activeJobsGauge } from "../metrics/metrics.js";
 let activeJobs = 0;
 
 export function canAcquireLock() {
-    return activeJobs < Number(config.WORKER_CONCURRENCY);
+    return activeJobs < Number(config.WORKER_CONCURRENCY || 5);
 }
 
 export function incrementActiveJobs() {
